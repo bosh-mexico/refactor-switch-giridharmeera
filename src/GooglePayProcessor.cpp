@@ -2,4 +2,5 @@
 
 void GooglePayProcessor::processPayment(double amount) {
     std::cout << "Processing GooglePay payment of $" << amount << std::endl;
+    // TODO: Integrate GooglePay API
 }
