@@ -7,7 +7,7 @@ using namespace std;
 void checkout(const string& mode, double amount, const PaymentProcessorFactory& factory) {
     try {
         auto processor = factory.create(mode);
-        processor->process(amount);
+        processor->processPayment(amount);
     } catch (const invalid_argument& e) {
         cerr << e.what() << endl;
     }
