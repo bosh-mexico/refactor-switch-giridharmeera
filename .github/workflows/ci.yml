@@ -31,21 +31,20 @@ jobs:
       # -----------------------------
       - name: Run cpplint
         run: |
-          cpplint --filter=-legal --linelength=100 src/**/*.cpp src/**/*.h app/**/*.cpp app/**/*.h
+          cpplint --filter=-legal --linelength=100 include/**/*.h src/**/*.cpp app/**/*.cpp
 
       # -----------------------------
       # Static analysis: cppcheck
       # -----------------------------
       - name: Run cppcheck
         run: |
-          cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem --std=c++17 -I src/ src/ app/
+          cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem --std=c++17 -I include/ src/ app/
 
       # -----------------------------
       # Static analysis: clang-tidy
       # -----------------------------
       - name: Run clang-tidy
         run: |
-          # Ensure compile_commands.json exists for clang-tidy
           cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           clang-tidy src/**/*.cpp app/**/*.cpp -p=build
 

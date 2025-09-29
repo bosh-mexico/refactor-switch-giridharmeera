@@ -1,55 +1,23 @@
-cmake_minimum_required(VERSION 3.14)
-project(PaymentProcessorLib VERSION 1.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.15)
+project(PaymentProcessorProject)
 
-# -----------------------------
-# C++ Standard
-# -----------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# -----------------------------
-# Include directories
-# -----------------------------
-include_directories("${PROJECT_SOURCE_DIR}/include")
+# Include headers
+include_directories(include)
 
-# -----------------------------
-# Collect all library source files
-# -----------------------------
-file(GLOB_RECURSE LIB_SOURCES
-    "${PROJECT_SOURCE_DIR}/src/*.cpp"
+# Source files
+set(SRC_FILES
+    src/CreditCardProcessor.cpp
+    src/GooglePayProcessor.cpp
+    src/PayPalProcessor.cpp
+    src/PaymentProcessorFactory.cpp
 )
 
-# Debug: print found sources
-message(STATUS "Library source files:")
-foreach(src_file ${LIB_SOURCES})
-    message(STATUS "  ${src_file}")
-endforeach()
+# Build library
+add_library(PaymentProcessorLib STATIC ${SRC_FILES})
 
-# Fail early if no sources found
-if(NOT LIB_SOURCES)
-    message(FATAL_ERROR "No source files found in src/. Make sure .cpp files exist.")
-endif()
-
-# -----------------------------
-# Build the static library
-# -----------------------------
-add_library(PaymentProcessorLib STATIC ${LIB_SOURCES})
-
-# -----------------------------
-# Build demo executable from app/main.cpp
-# -----------------------------
-set(APP_SOURCES "${PROJECT_SOURCE_DIR}/app/main.cpp")
-
-if(EXISTS ${APP_SOURCES})
-    add_executable(PaymentDemo ${APP_SOURCES})
-    target_link_libraries(PaymentDemo PRIVATE PaymentProcessorLib)
-    target_include_directories(PaymentDemo PRIVATE include)
-else()
-    message(WARNING "No main.cpp found in app/. Skipping demo executable build.")
-endif()
-
-# -----------------------------
-# Optional: install targets
-# -----------------------------
-install(TARGETS PaymentProcessorLib DESTINATION lib)
-install(DIRECTORY include/ DESTINATION include)
+# Build demo executable
+add_executable(PaymentDemo app/main.cpp)
+target_link_libraries(PaymentDemo PRIVATE PaymentProcessorLib)
