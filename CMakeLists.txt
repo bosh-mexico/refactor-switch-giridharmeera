@@ -1,18 +1,46 @@
 cmake_minimum_required(VERSION 3.14)
-project(PaymentProcessorLib VERSION 1.0)
+project(PaymentProcessorLib VERSION 1.0 LANGUAGES CXX)
 
+# -----------------------------
+# C++ standard
+# -----------------------------
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Include headers for installation
-include_directories(include)
+# -----------------------------
+# Include directories (public)
+# -----------------------------
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
-# Source files
-file(GLOB SOURCES "src/*.cpp")
+# -----------------------------
+# Collect all source files
+# -----------------------------
+file(GLOB_RECURSE SOURCES
+    "${PROJECT_SOURCE_DIR}/src/*.cpp"
+)
 
-# Create static library
+# -----------------------------
+# Debug: print found sources
+# -----------------------------
+message(STATUS "Found source files:")
+foreach(src_file ${SOURCES})
+    message(STATUS "  ${src_file}")
+endforeach()
+
+# -----------------------------
+# Fail early if no sources found
+# -----------------------------
+if(NOT SOURCES)
+    message(FATAL_ERROR "No source files found in src/. Make sure .cpp files exist.")
+endif()
+
+# -----------------------------
+# Build static library
+# -----------------------------
 add_library(PaymentProcessorLib STATIC ${SOURCES})
 
-# Optionally, define where to install
+# -----------------------------
+# Optional: Install targets
+# -----------------------------
 install(TARGETS PaymentProcessorLib DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)
