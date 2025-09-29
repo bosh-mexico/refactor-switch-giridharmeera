@@ -69,7 +69,7 @@ jobs:
       # Run demo
       # -----------------------------
       - name: Run demo
-        run: build/PaymentDemo
+        run: build/payment_app
 
       # -----------------------------
       # Check code complexity with lizard
