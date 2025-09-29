@@ -46,7 +46,8 @@ jobs:
       - name: Run clang-tidy
         run: |
           cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-          clang-tidy src/**/*.cpp app/**/*.cpp -p=build
+          # Recursively find all cpp files
+          find src/ app/ -name "*.cpp" | xargs clang-tidy -p=build
 
       # -----------------------------
       # Detect duplicate code: jscpd
@@ -64,7 +65,7 @@ jobs:
           cmake --build build
 
       # -----------------------------
-      # Run demo executable
+      # Run demo
       # -----------------------------
       - name: Run demo
         run: build/PaymentDemo
