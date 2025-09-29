@@ -54,7 +54,8 @@ jobs:
       # -----------------------------
       - name: Detect duplicate code
         run: |
-          jscpd "src/**/*.cpp" "app/**/*.cpp" --gitignore --min-lines 3 --min-tokens 25 --threshold 0
+          # Recursively find all cpp and h files and pass to jscpd
+          find src/ app/ -name "*.cpp" -o -name "*.h" | xargs jscpd --gitignore --min-lines 3 --min-tokens 25 --threshold 0
 
       # -----------------------------
       # Build library and demo executable
