@@ -6,29 +6,29 @@
 
 TEST(CreditCardProcessorTest, CanProcess) {
     CreditCardProcessor processor;
-    EXPECT_NO_THROW(processor.process(100.0));
+    EXPECT_NO_THROW(processor.processPayment(100.0));
 }
 
 TEST(PayPalProcessorTest, CanProcess) {
     PayPalProcessor processor;
-    EXPECT_NO_THROW(processor.process(200.5));
+    EXPECT_NO_THROW(processor.processPayment(200.5));
 }
 
 TEST(GooglePayProcessorTest, CanProcess) {
     GooglePayProcessor processor;
-    EXPECT_NO_THROW(processor.process(300.75));
+    EXPECT_NO_THROW(processor.processPayment(300.75));
 }
 
 TEST(PaymentProcessorFactoryTest, CreatesValidProcessor) {
     PaymentProcessorFactory factory;
     auto paypal = factory.create("PayPal");
-    EXPECT_NO_THROW(paypal->process(50));
+    EXPECT_NO_THROW(paypal->processPayment(50));
 
     auto gpay = factory.create("GooglePay");
-    EXPECT_NO_THROW(gpay->process(75));
+    EXPECT_NO_THROW(gpay->processPayment(75));
 
     auto credit = factory.create("CreditCard");
-    EXPECT_NO_THROW(credit->process(100));
+    EXPECT_NO_THROW(credit->processPayment(100));
 }
 
 TEST(PaymentProcessorFactoryTest, ThrowsOnInvalidProcessor) {
