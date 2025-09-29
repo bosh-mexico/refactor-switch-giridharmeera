@@ -31,14 +31,14 @@ jobs:
       # -----------------------------
       - name: Run cpplint
         run: |
-          cpplint --filter=-legal --linelength=100 include/**/*.h src/**/*.cpp app/**/*.cpp
+          cpplint --filter=-legal --linelength=100 include/**/*.h src/**/*.cpp Payment_app/**/*.cpp
 
       # -----------------------------
       # Static analysis: cppcheck
       # -----------------------------
       - name: Run cppcheck
         run: |
-          cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem --std=c++17 -I include/ src/ app/
+          cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem --std=c++17 -I include/ Payment_processor/ Payment_app/
 
       # -----------------------------
       # Static analysis: clang-tidy
@@ -47,7 +47,7 @@ jobs:
         run: |
           cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           # Recursively find all cpp files
-          find src/ app/ -name "*.cpp" | xargs clang-tidy -p=build
+          find Payment_processor/ Payment_app/ -name "*.cpp" | xargs clang-tidy -p=build
 
       # -----------------------------
       # Detect duplicate code: jscpd
@@ -55,7 +55,7 @@ jobs:
       - name: Detect duplicate code
         run: |
           # Recursively find all cpp and h files and pass to jscpd
-          find src/ app/ -name "*.cpp" -o -name "*.h" | xargs jscpd --gitignore --min-lines 3 --min-tokens 25 --threshold 0
+          find Payment_processor/ Payment_app/ -name "*.cpp" -o -name "*.h" | xargs jscpd --gitignore --min-lines 3 --min-tokens 25 --threshold 0
 
       # -----------------------------
       # Build library and demo executable
@@ -76,7 +76,7 @@ jobs:
       # -----------------------------
       - name: Limit complexity
         run: |
-          $HOME/.local/bin/lizard --CCN 3 --exclude "app/main.cpp" src/ app/
+          $HOME/.local/bin/lizard --CCN 3 --exclude "Payment_app/main.cpp" Payment_processor/ Payment_app/
 
       # -----------------------------
       # Collect coverage

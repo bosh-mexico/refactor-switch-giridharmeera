@@ -15,7 +15,7 @@ target_include_directories(payment_processors PUBLIC include)
 # -----------------------------
 # Main Executable
 # -----------------------------
-add_executable(payment_app app/main.cpp)
+add_executable(payment_app payment_app/main.cpp)
 target_link_libraries(payment_app PRIVATE payment_processors)
 
 # -----------------------------
