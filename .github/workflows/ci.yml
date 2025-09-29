@@ -37,19 +37,24 @@ jobs:
       # Static analysis: cppcheck
       # -----------------------------
       - name: Run cppcheck
-        run: cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem --std=c++17 src/ app/
+        run: |
+          cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem --std=c++17 -I src/ src/ app/
 
       # -----------------------------
       # Static analysis: clang-tidy
       # -----------------------------
       - name: Run clang-tidy
-        run: clang-tidy src/**/*.cpp app/**/*.cpp -p=.
+        run: |
+          # Ensure compile_commands.json exists for clang-tidy
+          cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          clang-tidy src/**/*.cpp app/**/*.cpp -p=build
 
       # -----------------------------
       # Detect duplicate code: jscpd
       # -----------------------------
       - name: Detect duplicate code
-        run: jscpd "src/**/*.cpp" "app/**/*.cpp" --gitignore --min-lines 3 --min-tokens 25 --threshold 0
+        run: |
+          jscpd "src/**/*.cpp" "app/**/*.cpp" --gitignore --min-lines 3 --min-tokens 25 --threshold 0
 
       # -----------------------------
       # Build library and demo executable
@@ -69,16 +74,18 @@ jobs:
       # Check code complexity with lizard
       # -----------------------------
       - name: Limit complexity
-        run: $HOME/.local/bin/lizard --CCN 3 --exclude "app/main.cpp" src/ app/
+        run: |
+          $HOME/.local/bin/lizard --CCN 3 --exclude "app/main.cpp" src/ app/
 
       # -----------------------------
       # Collect coverage
       # -----------------------------
       - name: Collect coverage
-        run: gcovr --gcov-exclude=".*test.*" -r . --html --html-details -o coverage.html --print-summary
+        run: |
+          gcovr --gcov-exclude=".*test.*" -r . --html --html-details -o coverage.html --print-summary
 
       # -----------------------------
-      # Upload coverage report
+      # Upload coverage artifact
       # -----------------------------
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
