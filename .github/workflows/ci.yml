@@ -1,0 +1,88 @@
+name: C++ CI - Full Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  full-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      # -----------------------------
+      # Checkout code
+      # -----------------------------
+      - uses: actions/checkout@v4
+
+      # -----------------------------
+      # Install dependencies
+      # -----------------------------
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy cppcheck cmake gcovr python3-pip
+          pip install cpplint lizard
+          npm install -g jscpd
+
+      # -----------------------------
+      # Linting: cpplint
+      # -----------------------------
+      - name: Run cpplint
+        run: |
+          cpplint --filter=-legal --linelength=100 src/**/*.cpp src/**/*.h app/**/*.cpp app/**/*.h
+
+      # -----------------------------
+      # Static analysis: cppcheck
+      # -----------------------------
+      - name: Run cppcheck
+        run: cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem --std=c++17 src/ app/
+
+      # -----------------------------
+      # Static analysis: clang-tidy
+      # -----------------------------
+      - name: Run clang-tidy
+        run: clang-tidy src/**/*.cpp app/**/*.cpp -p=.
+
+      # -----------------------------
+      # Detect duplicate code: jscpd
+      # -----------------------------
+      - name: Detect duplicate code
+        run: jscpd "src/**/*.cpp" "app/**/*.cpp" --gitignore --min-lines 3 --min-tokens 25 --threshold 0
+
+      # -----------------------------
+      # Build library and demo executable
+      # -----------------------------
+      - name: Build project
+        run: |
+          cmake -S . -B build
+          cmake --build build
+
+      # -----------------------------
+      # Run demo executable
+      # -----------------------------
+      - name: Run demo
+        run: build/PaymentDemo
+
+      # -----------------------------
+      # Check code complexity with lizard
+      # -----------------------------
+      - name: Limit complexity
+        run: $HOME/.local/bin/lizard --CCN 3 --exclude "app/main.cpp" src/ app/
+
+      # -----------------------------
+      # Collect coverage
+      # -----------------------------
+      - name: Collect coverage
+        run: gcovr --gcov-exclude=".*test.*" -r . --html --html-details -o coverage.html --print-summary
+
+      # -----------------------------
+      # Upload coverage report
+      # -----------------------------
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.html
+          retention-days: 7
