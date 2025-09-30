@@ -1,0 +1,96 @@
+name: C++ CI - Full Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  full-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      # -----------------------------
+      # Checkout code
+      # -----------------------------
+      - uses: actions/checkout@v4
+
+      # -----------------------------
+      # Install dependencies
+      # -----------------------------
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy cppcheck cmake gcovr python3-pip
+          pip install cpplint lizard
+          npm install -g jscpd
+
+      # -----------------------------
+      # Linting: cpplint
+      # -----------------------------
+      - name: Run cpplint
+        run: |
+          cpplint --filter=-legal --linelength=100 include/**/*.h Payment_processor/**/*.cpp Payment_app/**/*.cpp
+
+      # -----------------------------
+      # Static analysis: cppcheck
+      # -----------------------------
+      - name: Run cppcheck
+        run: |
+          cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem --std=c++17 -I include/ Payment_processor/ Payment_app/
+
+      # -----------------------------
+      # Static analysis: clang-tidy
+      # -----------------------------
+      - name: Run clang-tidy
+        run: |
+          cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          # Recursively find all cpp files
+          find Payment_processor/ Payment_app/ -name "*.cpp" | xargs clang-tidy -p=build
+
+      # -----------------------------
+      # Detect duplicate code: jscpd
+      # -----------------------------
+      - name: Detect duplicate code
+        run: |
+          # Recursively find all cpp and h files and pass to jscpd
+          find Payment_processor/ Payment_app/ -name "*.cpp" -o -name "*.h" | xargs jscpd --gitignore --min-lines 3 --min-tokens 25 --threshold 0
+
+      # -----------------------------
+      # Build library and demo executable
+      # -----------------------------
+      - name: Build project
+        run: |
+          cmake -S . -B build
+          cmake --build build
+
+      # -----------------------------
+      # Run demo
+      # -----------------------------
+      - name: Run demo
+        run: build/payment_app
+
+      # -----------------------------
+      # Check code complexity with lizard
+      # -----------------------------
+      - name: Limit complexity
+        run: |
+          $HOME/.local/bin/lizard --CCN 3 --exclude "Payment_app/main.cpp" Payment_processor/ Payment_app/
+
+      # -----------------------------
+      # Collect coverage
+      # -----------------------------
+      - name: Collect coverage
+        run: |
+          gcovr --gcov-exclude=".*test.*" -r . --html --html-details -o coverage.html --print-summary
+
+      # -----------------------------
+      # Upload coverage artifact
+      # -----------------------------
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.html
+          retention-days: 7
